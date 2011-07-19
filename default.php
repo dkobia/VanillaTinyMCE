@@ -31,6 +31,7 @@ $PluginInfo['VanillaTinymce'] = array(
 
 class VanillaTinymce extends Gdn_Plugin {
 
+	const MODE = 'simple';  // simple, advanced, full
 	private $path;
 
 	public function __construct()
@@ -40,27 +41,17 @@ class VanillaTinymce extends Gdn_Plugin {
 
 	public function Base_Render_Before(&$Sender)
 	{
-		$mode = "simple"; // simple/full/medium
-
 		$Sender->AddJSFile('plugins/VanillaTinymce/tiny_mce.js');
 		$Sender->AddJSFile('plugins/VanillaTinymce/jquery.tinymce.js');
-		$Sender->Head->AddString($this->_mode($mode));
+
+		$Sender->Head->AddString($this->_mode(self::MODE));
 	}
 
 	private function _mode($mode = "simple")
 	{
-		if ($mode == "full")
-		{
-			return $this->_full();
-	}
-		elseif ($mode == "advanced")
-		{
-			return $this->_advanced();
-		}
-		else
-		{
-			return $this->_simple();
-		}
+		$mode = '_' . $mode;
+
+		return $this->$mode();
 	}
 
 	private function _simple()
