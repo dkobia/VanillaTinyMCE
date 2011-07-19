@@ -8,10 +8,10 @@
 * WYSIWYG editor control released as Open Source under LGPL by
 * Moxiecode Systems AB. It has the ability to convert HTML
 * TEXTAREA fields or other HTML elements to editor instances.
-* 
+*
 * ### TinyMCE in Vanilla 2 ###
 * Offers 3 options that can further be customized:
-* 
+*
 *   FULL: The complete TinyMCE Toolbar
 *   ADVANCED: Lacks a few of the options in the FULL toolbar
 *   SIMPLE (Default): The most simple functions of TinyMCE
@@ -30,29 +30,29 @@ $PluginInfo['VanillaTinymce'] = array(
 );
 
 class VanillaTinymce extends Gdn_Plugin {
-	
+
 	private $path;
-	
+
 	public function __construct()
 	{
 		$this->path = Gdn::Request()->Url('plugins/VanillaTinymce');
 	}
-	
+
 	public function Base_Render_Before(&$Sender)
 	{
 		$mode = "simple"; // simple/full/medium
-		
-		$Sender->AddJSFile('plugins/VanillaTinymce/tinymce.js');
+
+		$Sender->AddJSFile('plugins/VanillaTinymce/tiny_mce.js');
 		$Sender->AddJSFile('plugins/VanillaTinymce/jquery.tinymce.js');
 		$Sender->Head->AddString($this->_mode($mode));
 	}
-	
+
 	private function _mode($mode = "simple")
 	{
 		if ($mode == "full")
 		{
 			return $this->_full();
-		}
+	}
 		elseif ($mode == "advanced")
 		{
 			return $this->_advanced();
@@ -62,7 +62,7 @@ class VanillaTinymce extends Gdn_Plugin {
 			return $this->_simple();
 		}
 	}
-	
+
 	private function _simple()
 	{
 		$html = <<<EOF
@@ -79,10 +79,10 @@ class VanillaTinymce extends Gdn_Plugin {
 			</script>
 EOF;
 		// No WhiteSpace in front of EOF!!
-		
+
 		return $html;
 	}
-	
+
 	private function _full()
 	{
 		$html = <<<EOF
@@ -91,7 +91,7 @@ EOF;
 					$('#Form_Body').tinymce({
 						// Location of TinyMCE script
 						script_url : '$this->path/tiny_mce.js',
-					
+
 						// General options
 						theme : "advanced",
 						plugins : "pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,inlinepopups,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template,advlist",
@@ -126,9 +126,9 @@ EOF;
 EOF;
 		// No WhiteSpace in front of EOF!!
 
-		return $html;		
+		return $html;
 	}
-	
+
 	private function _advanced()
 	{
 		$html = <<<EOF
@@ -164,15 +164,15 @@ EOF;
 						template_replace_values : {
 							username : "Some User",
 							staffid : "991234"
-						}					
+						}
 					});
 				});
 			</script>
 EOF;
 		// No WhiteSpace in front of EOF!!
 
-		return $html;		
-	}	
-	
+		return $html;
+	}
+
 	public function Setup(){}
-}
+	}
