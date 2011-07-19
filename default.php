@@ -26,7 +26,7 @@ $PluginInfo['VanillaTinymce'] = array(
    'Author' => "David Kobia",
    'AuthorEmail' => 'david@kobia.net',
    'AuthorUrl' => 'http://www.dkfactor.com',
-   'SettingsUrl' => '/dashboard/plugin/VanillaTinyMCE',
+   'SettingsUrl' => '/plugin/VanillaTinymce',
    'SettingsPermission' => 'Garden.Settings.Manage',
    'RequiredApplications' => array('Vanilla' => '>=2')
 );
@@ -233,7 +233,7 @@ EOF;
 	*
 	* @param $Sender Sending controller instance
 	*/
-	public function PluginController_Example_Create($Sender) {
+	public function PluginController_VanillaTinymce_Create($Sender) {
 	  /*
 	   * If you build your views properly, this will be used as the <title> for your page, and for the header
 	   * in the dashboard. Something like this works well: <h1><?php echo T($this->Data['Title']); ?></h1>
@@ -288,7 +288,7 @@ EOF;
 		}
 		else
 		{
-			$ConfigurationModel->Validation->ApplyRule('Plugin.VanillaTinyMCE.RenderCondition', 'Required');
+			$ConfigurationModel->Validation->ApplyRule('Plugin.VanillaTinyMCE.Mode', 'Required');
 
 			if( $Sender->Form->Save() ) $Sender->StatusMessage = T("Your changes have been saved.");
 		}
