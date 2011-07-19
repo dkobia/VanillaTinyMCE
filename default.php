@@ -22,7 +22,7 @@
 $PluginInfo['VanillaTinymce'] = array(
    'Name' => 'Vanilla TinyMCE',
    'Description' => '<a href="#" target="_blank">TinyMCE jQuery WYSIWYG plugin for Vanilla 2.</a>',
-   'Version' => '0.5',
+   'Version' => '0.7',
    'Author' => "David Kobia",
    'AuthorEmail' => 'david@kobia.net',
    'AuthorUrl' => 'http://www.dkfactor.com',
@@ -33,7 +33,6 @@ $PluginInfo['VanillaTinymce'] = array(
 
 class VanillaTinymce extends Gdn_Plugin {
 
-	const MODE = 'simple';  // simple, basic, advanced, full
 	private $path;
 
 	public function __construct()
@@ -46,7 +45,11 @@ class VanillaTinymce extends Gdn_Plugin {
 		$Sender->AddJSFile('plugins/VanillaTinymce/tiny_mce.js');
 		$Sender->AddJSFile('plugins/VanillaTinymce/jquery.tinymce.js');
 
-		$Sender->Head->AddString($this->_mode(self::MODE));
+		$mode = C('Plugin.VanillaTinyMCE.Mode');
+
+		if( !$mode ) $mode = 'simple';
+
+		$Sender->Head->AddString($this->_mode($mode));
 	}
 
 	private function _mode($mode = "simple")
@@ -183,6 +186,7 @@ EOF;
 						// Theme options
 						theme_advanced_buttons1 : "save,newdocument,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,styleselect,formatselect,fontselect,fontsizeselect",
 						theme_advanced_buttons2 : "bullist,numlist,|blockquote,|,link,unlink,image,|,preview,|,forecolor,",
+						theme_advanced_buttons3 : "",
 						theme_advanced_toolbar_location : "top",
 						theme_advanced_toolbar_align : "left",
 						theme_advanced_statusbar_location : "bottom",
@@ -211,11 +215,85 @@ EOF;
 		return $html;
 	}
 
-	public function Setup(){}
-
-	public function Controller_Index($Sender) {
-
-	   $Sender->Render($this->GetView('settings.php'));
+	public function Setup() {
+	  SaveToConfig('Plugin.VanillaTinyMCE.Mode', 'simple');
 	}
 
+
+	/**
+	* Create a method called "Example" on the PluginController
+	*
+	* One of the most powerful tools at a plugin developer's fingertips is the ability to freely create
+	* methods on other controllers, effectively extending their capabilities. This method creates the
+	* Example() method on the PluginController, effectively allowing the plugin to be invoked via the
+	* URL: http://www.yourforum.com/plugin/Example/
+	*
+	* From here, we can do whatever we like, including turning this plugin into a mini controller and
+	* allowing us an easy way of creating a dashboard settings screen.
+	*
+	* @param $Sender Sending controller instance
+	*/
+	public function PluginController_Example_Create($Sender) {
+	  /*
+	   * If you build your views properly, this will be used as the <title> for your page, and for the header
+	   * in the dashboard. Something like this works well: <h1><?php echo T($this->Data['Title']); ?></h1>
+	   */
+	  $Sender->Title('VanillaTinyMCE');
+	  $Sender->AddSideMenu('plugin/VanillaTinymce');
+
+	  // If your sub-pages use forms, this is a good place to get it ready
+	  $Sender->Form = new Gdn_Form();
+
+	  /*
+	   * This method does a lot of work. It allows a single method (PluginController::Example() in this case)
+	   * to "forward" calls to internal methods on this plugin based on the URL's first parameter following the
+	   * real method name, in effect mimicing the functionality of as a real top level controller.
+	   *
+	   * For example, if we accessed the URL: http://www.yourforum.com/plugin/Example/test, Dispatch() here would
+	   * look for a method called ExamplePlugin::Controller_Test(), and invoke it. Similarly, we we accessed the
+	   * URL: http://www.yourforum.com/plugin/Example/foobar, Dispatch() would find and call
+	   * ExamplePlugin::Controller_Foobar().
+	   *
+	   * The main benefit of this style of extending functionality is that all of a plugin's external API is
+	   * consolidated under one namespace, reducing the chance for random method name conflicts with other
+	   * plugins.
+	   *
+	   * Note: When the URL is accessed without parameters, Controller_Index() is called. This is a good place
+	   * for a dashboard settings screen.
+	   */
+	  $this->Dispatch($Sender, $Sender->RequestArgs);
+	}
+
+	public function Controller_Index($Sender)
+	{
+		// Prevent non-admins from accessing this page
+		$Sender->Permission('Vanilla.Settings.Manage');
+
+		$Sender->SetData('PluginDescription',$this->GetPluginKey('Description'));
+
+		$Validation = new Gdn_Validation();
+		$ConfigurationModel = new Gdn_ConfigurationModel($Validation);
+		$ConfigurationModel->SetField(
+			array('Plugin.VanillaTinyMCE.Mode' => 'simple')
+		);
+
+		// Set the model on the form.
+		$Sender->Form->SetModel($ConfigurationModel);
+
+		// If seeing the form for the first time...
+		if ($Sender->Form->AuthenticatedPostBack() === FALSE)
+		{
+			// Apply the config settings to the form.
+			$Sender->Form->SetData($ConfigurationModel->Data);
+		}
+		else
+		{
+			$ConfigurationModel->Validation->ApplyRule('Plugin.VanillaTinyMCE.RenderCondition', 'Required');
+
+			if( $Sender->Form->Save() ) $Sender->StatusMessage = T("Your changes have been saved.");
+		}
+
+		// GetView() looks for files inside plugins/PluginFolderName/views/ and returns their full path. Useful!
+		$Sender->Render($this->GetView('settings.php'));
+	}
 }
