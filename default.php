@@ -26,6 +26,8 @@ $PluginInfo['VanillaTinymce'] = array(
    'Author' => "David Kobia",
    'AuthorEmail' => 'david@kobia.net',
    'AuthorUrl' => 'http://www.dkfactor.com',
+   'SettingsUrl' => '/dashboard/plugin/VanillaTinyMCE',
+   'SettingsPermission' => 'Garden.Settings.Manage',
    'RequiredApplications' => array('Vanilla' => '>=2')
 );
 
@@ -210,4 +212,10 @@ EOF;
 	}
 
 	public function Setup(){}
+
+	public function Controller_Index($Sender) {
+
+	   $Sender->Render($this->GetView('settings.php'));
 	}
+
+}
